@@ -1,4 +1,9 @@
+const express = require('express');
+const graphqlHTTP = require('express-graphql');
 const { graphql, buildSchema } = require('graphql');
+
+const PORT = process.env.PORT || 3000;
+const server = express();
 
 const schema = buildSchema(`
 type Query {
@@ -10,16 +15,25 @@ type Schema {
 }
 `);
 
+const videos = [];
+
 const resolvers = {
-  foo: () => 'bar',
+  video: () => ({
+    id: 1,
+    title: 'Foo',
+    duration: 180,
+    watched: true,
+  }),
+  videos: () => videos,
 };
 
-const query = `
-query myFirstQuery {
-  foo
-}
-`;
+server.use(
+  '/graphql',
+  graphqlHTTP({
+    schema,
+    graphiql: true,
+    resolvers: resolvers,
+  }),
+);
 
-graphql(schema, query, resolvers)
-  .then(result => console.log(result))
-  .catch(errors => console.log(errors));
+server.listen(PORT, () => console.log(`Server Listeting on port ${PORT}`));
